@@ -1,0 +1,80 @@
+---
+title: "Homework01"
+author: "Emmenta Janneh"
+date: "2024-01-18"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+## R Basic
+1. Load these data into R, directly using the URL (i.e., don’t download it first to load it into R). Call the resulting data frame cdi.
+```{r}
+cdi <- read.csv("https://dcgerard.github.io/stat_415_615/data/cdi.csv")
+head(cdi)
+```
+
+2. reate a new variable called log_capita_income, which is the log-transformed capita_income. Make sure this new variable is present in the cdi data frame.
+```{r}
+cdi <- mutate(cdi, log_capita_income = log(cdi$capita_income))
+head(cdi)
+```
+
+3. Use R to calculate the mean and standard deviation of area.
+```{r}
+area_mean <- mean(cdi$area)
+area_sd <- sd(cdi$area)
+
+area_mean
+area_sd
+```
+
+4. Rename the pop variable to population. Make sure the cdi data frame has been modified.
+```{r}
+cdi <- rename(cdi, population = pop)
+head(cdi)
+```
+
+5. Use filter() to print out just the rows from Delaware.
+```{r}
+filter(cdi, county == "Delaware")
+```
+
+6. Use an appropriate plot (via {ggplot2}) to explore the relationship between capita_income
+and unemployment. Describe the relationship in a couple of sentences.
+```{r}
+ggplot(cdi, aes(x = unemployment, y = capita_income)) + 
+  geom_point()
+```
+The scatterplot shows counties with less unemployment rate has much higher capital_income than counties with higher unemployment rate. Although counties with lower unemployment also have lower capita_income, this can be explained by other influencing factors other that unemployment rate.
+
+7. Use an appropriate plot (via {ggplot2}) to explore the relationship between capita_income
+and region
+```{r}
+ggplot(cdi, aes(x = region, y = capita_income)) +
+  geom_boxplot()
+```
+
+## Miscillaneous
+```{r}
+x <- seq(1, 100, by = 3)
+```
+
+1. The sum of the log of the values of x
+```{r}
+sum(log(x))
+```
+
+2. The log of the sum of the values of x
+```{r}
+log(sum(x))
+```
+
+**Are these values the same?**
+*NO, the vales are not the same, question one is looking for the addition of the log of the values of x, while question 2 is looking for the log of the sum of all x values.

@@ -1,0 +1,69 @@
+---
+title: "Simple_Regression_Intro"
+author: "Emmenta Janneh"
+date: "2024-02-01"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We load in the data
+```{r}
+library(tidyverse)
+hibbs <- read.csv("https://dcgerard.github.io/stat_415_615/data/hibbs.csv")
+```
+
+You can use `lm()` (linear model) function to find the OLS estimates.
+- First argument is a "formula" which uses a tilde ~
+y ~ x
+- Second argument is the data frame containing the variables
+- You assign the output to some variables, so you can manipulate it later
+```{r}
+lm_hibbs <- lm(vote ~ growth, data = hibbs)
+lm_hibbs
+```
+
+To interact with this lm object, it is wasiest to use the broom package.
+- `glance()`: will provide a 1 row summary of the model
+- `tidy()`: will provide one row per parameter estimate
+- `augment()`: will provide one row per observational unit
+```{r}
+library(broom)
+tidy(lm_hibbs)
+glance(lm_hibbs)
+augment(lm_hibbs)
+```
+*Note:* **We use `augment()` to get the residuals and fitted values.
+
+
+## Lets take a look at another sample
+```{r}
+data("mtcars")
+lm_mtcars <- lm(mpg ~ wt, data = mtcars)
+tidy(lm_mtcars)
+```
+
+Cars that weight 1000 pounds more have 5.3 worse MPG on average.
+37.285 is the y-intercept of the regression line.
+
+You should always plot the data BEFORE doing a regression
+```{r}
+ggplot(mtcars, aes(x = wt, y = mpg)) + 
+  geom_point()
+```
+
+
+*What if you want an estimated value at an X not in the data set?*
+To predict what Y will be given a value of X, you create a new data frame with those values of X.
+```{r}
+newdf <- data.frame(growth = c(1,2,3.3))
+```
+
+Then you feed this, as well as the lm object, into `predict()`
+```{r}
+predict(object = lm_hibbs, newdata = newdf)
+```
+
+

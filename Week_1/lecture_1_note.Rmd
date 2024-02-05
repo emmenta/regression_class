@@ -1,0 +1,120 @@
+---
+title: "lectuer_1_note"
+author: "Emmenta Janneh"
+date: "2024-01-17"
+output: pdf_document
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+x <- 1
+x
+```
+
+These are simple r code for rmarkdown
+
+# # - This is header 1
+## - double # is for header 2
+
+This is *italic*
+This is **bold**
+
+- This is item 1
+- This is item 2
+- This is item 3
+
+1. enumerated item 1
+2. enumerated item 2
+3. enumerated item 3
+
+<https://www.google.com> is a clickable link
+
+[this is a hyperlink](https://www.google.com)
+
+
+
+# Plotting and visualization
+```{r}
+data("mpg", package = "ggplot2")
+glimpse(mpg)
+```
+
+```{r}
+ggplot(mpg, aes(x = hwy, y = cty, color = class))
+```
+
+## The BEST plot for each situation:
+ - One quantitative variables, look at its distribution: histogram
+ - One categorical variable, look at its distribution: bar
+ - Two quantitative, look at their association: scatterplot
+ - One quantitative and one categorical, look st their association: boxplot
+ - Two categorical: two-way table
+ 
+## One quantitative
+```{r}
+ggplot(mpg, aes(x = hwy)) + 
+  geom_histogram(bins = 15)
+```
+ 
+## One categorical 
+```{r}
+ggplot(mpg, aes(x = class)) + 
+  geom_bar()
+```
+
+## Two quantitative 
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) + 
+  geom_point()
+```
+
+
+We can fix overplotting when there are overlaps with geom_jitters()
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) + 
+  geom_jitter()
+```
+
+
+You can vie a smoother with geom_smooth()
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+## Boxplots for discrete x and continuous y
+```{r}
+ggplot(mpg, aes(x = class, y = hwy)) + 
+  geom_boxplot()
+
+ggplot(mpg, aes(x = hwy, y = class)) + 
+  geom_boxplot()
+```
+
+You can color code by a third variable
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, color = class)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+

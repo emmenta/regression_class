@@ -1,0 +1,77 @@
+---
+title: "Homework_02"
+author: "Emmenta Janneh"
+date: "2024-01-27"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+cdi <- read.csv("https://dcgerard.github.io/stat_415_615/data/cdi.csv")
+head(cdi)
+```
+
+## County Demographic Information
+
+### log(y) = 1.87 + 0.79log(x)
+
+1.  The given equation is an example of a **Power-law** relationship. In a power-law relationship, the dependent variable(y) is related to the independent variable(x) through the power function, expressed as: y = y.C\^B1 where C is a constant and B1 is the exponent or slope of the line.
+
+2.  
+
+```{r}
+reg_table <- mutate(cdi, log_phy = log(physicians),
+                         log_bed = log(beds)) %>%
+              select(log_phy, log_bed)
+head(reg_table)
+```
+
+```{r}
+ggplot(data = reg_table, aes(x = log_phy, y = log_bed)) + 
+  geom_point() + 
+  geom_abline(slope = 0.79, intercept = 1.87, color = "red")
+```
+
+3.  
+
+    log(y) = 1.87 + 0.79log(x)
+
+    y = 1.87 . x\^0.79
+
+4.  For every C number of beds in a hospital, there is C\^0.79 as many physicians, on average.
+
+### log(y) = 6.26 + 0.022x
+
+5.  The given equation is an example of a **Exponential growth/decline** relationship. In a exponential growth/decline relationship, the dependent variable(y) is related to the independent variable(x) through the exponential function, expressed as: y = y.exp(C\*B1) where C is a constant and B1 is slope of the line.
+
+6.  For every unit higher in beds in the hospital, there is exp(0.022) times more beds, on average.
+
+**Rephrase:** For each unit in beds, there is a 2.2% times more bachelors degree holders, on average.
+
+7.  **6.26** is the y-intercept of the regression line.
+
+## University Admissions Data
+
+```{r}
+uad <- read.csv("https://dcgerard.github.io/stat_415_615/data/university.csv")
+head(uad)
+```
+
+1.  
+
+```{r}
+ggplot(uad, aes(x = act, y = gpa)) + 
+  geom_jitter()
+```
+
+From the above plot, there is an association between gpa and act of students. Although the association is a little faint, the graph shows a positive association between the variables.
+
+2.  **0.058**: For every unit score in ACT(x), student's GPA is higher by 0.058, on average. **1.56**: This is the GPA score when ACT score is 0.
+
+## Miscellaneous
+
+1.  No I won't be happy, the economy is recovered an I am expecting to get the same value as my old salary or more. Decreasing my salary by 10% and later increasing it by another 10% will not get the same old value.

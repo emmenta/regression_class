@@ -1,0 +1,93 @@
+---
+title: "Lab_01-1"
+author: "Emmenta Janneh"
+date: "2024-01-17"
+output: pdf_document
+urlcolor: "blue"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+# Lab 01-1
+
+Load the CDI dataset into R, saving the data frame in a variable called `cdi`.
+
+```{r}
+cdi <- read_csv("https://dcgerard.github.io/stat_415_615/data/cdi.csv")
+```
+
+Use a function that provides a rough glimpse at these data.
+
+```{r}
+glimpse(cdi)
+```
+
+Calculate the mean and standard deviation of the population of the counties
+
+```{r}
+pop_mean <- mean(cdi$pop)
+pop_mean
+
+pop_sd <- sd(cdi$pop)
+pop_sd
+```
+
+Convert the `pop` variable to be in units of 100,000 individuals (so 1 corresponds to 100,000, 2 corresponds to 200,000, ect).
+
+```{r}
+cdi <- mutate(cdi, pop = pop/100000)
+glimpse(cdi)
+```
+
+Use an appropriate plot to explore the association between population and number of physicians.
+
+```{r}
+ggplot(cdi, aes(x = physicians, y = pop)) +
+  geom_point()
+```
+
+Use an appropriate plot to explore the association between region and population
+
+```{r}
+ggplot(cdi, aes(x = region, y = pop)) +
+  geom_boxplot()
+```
+
+Use an appropriate plot to explore the association between population and number of physicians in each region.
+
+```{r}
+ggplot(cdi, aes(y = pop, x = physicians)) + 
+  geom_point() +
+  facet_grid(~ region)
+```
+
+Create four datasets, one for each region.
+
+```{r}
+cdi_NC <- filter(cdi, region == "NC")
+head(cdi_NC)
+
+cdi_NE <- filter(cdi, region == "NE")
+head(cdi_NE)
+
+cdi_S <- filter(cdi, region == "S")
+head(cdi_S)
+
+cdi_W <- filter(cdi, region == "W")
+head(cdi_W)
+```
+
+Reproduce the following using markdown:
+
+1.  It was the best of times,
+2.  It was the worst of times,
+
+-   **It was the age of wisdom**,
+-   *it was the age of foolishness*,
+-   [it was the epoch of belief](https://www.youtube.com/watch?v=dQw4w9WgXcQ)...
