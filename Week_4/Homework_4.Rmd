@@ -1,0 +1,106 @@
+---
+title: "Homework_4"
+author: "Emmenta Janneh"
+date: "2024-02-11"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(broom)
+```
+
+## Conceptual Exercises
+
+1.  The standard error of β1 would decrease when a new observational unit is obtained with Xnew = Xmean. When Xnew = Xmean, the distance of each data point from the mean, Xi - Xmean, remains the same for all data points, including the new one. Therefore, the denominator of the formula remains constant.
+
+    Since the denominator remains constant and Var is also assumed to be constant, the standard error SE would decrease as n ( the sample size) increases with the addition of the new observational unit.
+
+2.  
+
+    ```{r}
+    2 * pt(-7.52, df = 13)
+    0.997 / 0.111
+    ```
+
+    \## \# A tibble: 2 x 5\
+    \## term estimate std.error statistic p.value\
+    \## \<chr\> \<dbl\> \<dbl\> \<dbl\> \<dbl\>\
+    \## 1 (Intercept) 8.39 1.11 7.52 `0.00000437`\
+    \## 2 Years 0.997 0.111 `8.982` 0.000000618
+
+3.  
+
+    ```{r}
+    estimate <- c(8.39, 0.997)
+    std_error <- c(1.11, 0.111)
+    statistic <- c(7.52, 8.982)
+    df <- 15 - 2
+    t_critical <- qt(0.975, df)
+
+    lower_ci <- estimate - t_critical * std_error
+    upper_ci <- estimate + t_critical * std_error
+
+    ci_data <- data.frame(term = c("(Intercept)", "Years"),
+                          lower_ci = lower_ci,
+                          upper_ci = upper_ci
+                          )
+    ci_data
+
+    ```
+
+## Wheatears
+```{r}
+library(Sleuth3)
+data("ex0727")
+data("ex0727")
+wheat <- ex0727
+glimpse(wheat)
+```
+
+```{r}
+lmout <- lm(Mass ~ Tcell, data = wheat)
+ggplot(wheat, aes(x = Tcell, y = Mass)) + 
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+
+1. 
+
+```{r}
+n <- nrow(wheat)
+n
+tidy(lmout, conf.int = TRUE)
+```
+
+Form the above information, we have a positive linear association between Tcell and Mass. `3.91` is the y-intercept of the regression line. Birds with `1mm` higher Tcell are estimated to carry on average `10.2g` higher stone mass (95% confidence interval of `3.3g` lower to `17.1g` higher). With a strong evidence that this association is not due to chance alone *(p = 0.006, n = 21)*.
+
+2. 
+```{r}
+newbird <- data.frame(Tcell = c(0.35))
+predict(object = lmout, newdata = newbird, interval = "confidence") %>% cbind(newbird)
+```
+We estimate that a bird with Tcell of 0.35mm can carry on average a stone with mass `7.5g` (95% confidence interval of 6.8g lower to 8.1g higher).
+
+3. 
+```{r}
+newbird <- data.frame(Tcell = c(0.2))
+predict(object = lmout, newdata = newbird, interval = "confidence")
+```
+
+Birds with 0.2mm Tcell are estimated to carry on average `5.9g` mass of stone (95% confidence interval of 4.9g lower to 7.0g higher mass).
+
+4. 
+```{r}
+advbird <- data.frame(Tcell = c(20))
+predict(object = lmout, newdata = advbird, interval = "predict")
+```
+
+We estimate that a \"super\" bird with Tcell of 20mm can carry on average `207.2g` (95% prediction interval of 71.5g lower to 342.9g higher).

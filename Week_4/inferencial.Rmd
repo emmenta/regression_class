@@ -1,0 +1,54 @@
+---
+title: "inference"
+author: "Emmenta Janneh"
+date: "2024-02-10"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(broom)
+
+hibbs <- read.csv("https://dcgerard.github.io/stat_415_615/data/hibbs.csv")
+lm_hibbs <- lm(vote ~ growth, data = hibbs)
+tidy(lm_hibbs)
+```
+
+```{r}
+lm_mtcars <- lm(mpg ~ drat, data = mtcars)
+tidy(lm_mtcars)
+```
+
+```{r}
+7.678 / 1.507  ## 5.096
+
+nrow(mtcars) ## n = 32
+
+2 * pt(-5.096, df = 30)  ## 0.00001776
+```
+
+To get a confidence interval in R use `conf.int = TRUE` in `tidy()`.
+```{r}
+tidy(lm_hibbs, conf.int = TRUE)
+```
+
+Let's use the p-value and the confidence interval to make a final report of the hibbs data.
+
+We estimate that elections with 1 pp more growth have 3.1 pp higher vote share for the incumbent persident on average (95% CI of 1.6 pp to 4.6 pp higher). We have strong evidence of the linear association between economic growth and incumbent vote share (p-value = 0.00061, n = 16).
+
+To get point-wise confidence interval in R, first fit the linear model, then create new data at the point you want the interval, then use the `predict()` function with `interval = "confidence"`.
+
+```{r}
+lm_hibbs
+newdf <- data.frame(growth = c(1, 2))
+predict(lm_hibbs, newdata = newdf, interval = "confidence")
+predict(lm_hibbs, newdata = newdf, interval = "predict")
+```
+
+Years with 1% economic growth are estimated on average to have 49.3% incumbent vote-share (95% CI 46.9% to 51.7%)
+
+We predict that an election year with 1% growth will have 49.3% incumbent vote share (95% predicition interval of 40.9% to 57.7%)
