@@ -3,8 +3,8 @@ title: "Homework_3"
 author: "Emmenta Janneh"
 date: "2024-02-04"
 output:
-  pdf_document: default
   word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 1.  **FALSE**, *`E[Yi|Xi] = β0 + β1Xi`* The equation does not explicitly include the noise affecting Yi. *`E[Yi|Xi]`*, focus on the systematic or average relationship between Yi and Xi, abstracting from the specific realization of the random error term for a given observation. However, the error term is an inheret part of the regression model and is typically included in the broader regression equation: *Yi = β0 + β1Xi + ϵi*
 
-2.  The key point in the fact that the error terms (*ϵi and ηi)* capture different sources of variance. In the regression of Y on X, the error term (*ϵi)* accounts for unobserved factors affecting Y, while in the regression of X on Y, the error term(*ηi)* accounts for unobserved factors affecting X. The asymmetry in the roles of dependent and independent variables contributes to the non-equivalence of the OLS estimates. This is grounded in the idea that the relationship between Y and X may not be symmetric or bidirectional; changes in X may have a different impact on Y compare to changes in Y influencing X.
+2.  The key point in the fact that the error terms *(ϵi and ηi)* capture different sources of variance. In the regression of Y on X, the error term *(ϵi)* accounts for unobserved factors affecting Y, while in the regression of X on Y, the error term *(ηi)* accounts for unobserved factors affecting X. The asymmetry in the roles of dependent and independent variables contributes to the non-equivalence of the OLS estimates. This is grounded in the idea that the relationship between Y and X may not be symmetric or bidirectional; changes in X may have a different impact on Y compare to changes in Y influencing X.
 
 3.  From the graph, Constant variance appears to be violated by the regression.
 
@@ -39,7 +39,7 @@ ggplot(university, aes(x = act, y = gpa)) +
 
 There is a positive association between ACT score and GPA score.
 
-2.  No, a simple linear regression model does not appear appropriately. There seem to be a violation on Constant Variance.
+2.  No, a simple linear regression model does not appear appropriately. There is a violation on Constant Variance.
 
 3.  
 
@@ -50,9 +50,7 @@ lm_university
 
 gpa = 1.5587 + 0.0578(act)
 
-4.  **1.5587** is the gpa score of students when act score is 0. For every unit score in act, gpa is higher by **0.0578**
-
-<!-- -->
+4.  **1.5587** is the y-intercept of the regression line. For every unit score in act, gpa is higher by **0.0578**
 
 5.  
 
