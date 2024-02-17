@@ -1,0 +1,144 @@
+---
+title: "Homework_5"
+author: "Emmenta Janneh"
+date: "2024-02-17"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(broom)
+library(car)
+library(lmtest)
+library(sandwich)
+sol <- tribble(~conc, ~time,
+               0.07, 9,
+               0.09, 9,
+               0.08, 9,
+               0.16, 7,
+               0.17, 7,
+               0.21, 7,
+               0.49, 5,
+               0.58, 5,
+               0.53, 5,
+               1.22, 3,
+               1.15, 3,
+               1.07, 3,
+               2.84, 1,
+               2.57, 1,
+               3.10, 1
+)
+```
+
+### 1
+```{r}
+ggplot(sol, aes(x = time, y = conc)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE)
+  
+```
+
+```{r}
+lm_sol <- lm(conc~time, data = sol)
+a_sol <- augment(lm_sol)
+ggplot(a_sol, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+```
+
+From the graph above, we observe the following:
+ - Curved relation between time and concentration
+ - Monotone
+ - Variance look like it increase as y increases
+
+```{r}
+sol <- mutate(sol, log_conc = log(conc))
+ggplot(sol, aes(x = time, y = log_conc)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE)
+```
+```{r}
+new_lmsol <- lm(log_conc ~ time, sol)
+new_asol <- augment(new_lmsol)
+ggplot(new_asol, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+```
+Explaination here
+
+
+
+
+
+We are using the estate data from `https://dcgerard.github.io/stat_415_615/data/estate.csv` for this analysis.
+```{r}
+estate <- read_csv("https://dcgerard.github.io/stat_415_615/data/estate.csv")
+```
+The two variables are
+ - `price`: sales price for houses.
+ - `area`: size of houses in square feet.
+
+```{r}
+ggplot(estate, aes(x = area, y = price)) +
+  geom_point()
+```
+
+```{r}
+glance(lm_estate)
+```
+
+```{r}
+lm_estate <- lm(price ~ area, estate)
+tidy(lm_estate, conf.int = TRUE)
+```
+
+```{r}
+newdf <- data.frame(area = c(576, 1020, 3067))
+predict(object = lm_estate, newdata = newdf, interval = "confidence") |>
+  cbind(newdf)
+```
+
+```{r}
+ggplot(estate, aes(x = area, y = price)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_smooth(se = FALSE, color = "red", linetype = 2)
+```
+
+
+```{r}
+a_estate <- augment(lm_estate)
+ggplot(a_estate, aes(x = .fitted, y = .resid)) +
+  geom_point() + 
+  geom_hline(yintercept = 0, color = "blue", linewidth = 1) + 
+  geom_smooth(se = FALSE, color = "red", linetype = 2)
+
+```
+
+
+```{r}
+new_estate <- mutate(estate, log_price = log(price), log_area = log(area))
+ggplot(new_estate, aes(x = log_area, y = log_price)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE)
+```
+
+```{r}
+new_lmestate <- lm(log_price ~ log_area, new_estate)
+a_newestate <- augment(new_lmestate)
+ggplot(a_newestate, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, color = "blue", linewidth = 1)
+```
+
+
+```{r}
+cout <- coeftest(lm_estate, vcon. = vcovHC)
+tidy(cout)
+```
+
+

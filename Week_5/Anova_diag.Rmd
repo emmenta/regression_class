@@ -1,0 +1,81 @@
+---
+title: "Anova and Diagnostics"
+author: "Emmenta Janneh"
+date: "2024-02-17"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(broom)
+library(car) # companion of applied regression
+
+hibbs <- read_csv("https://dcgerard.github.io/stat_415_615/data/hibbs.csv")
+```
+
+To do an ANOVA approach, first fit the linear model, then use the `Anova()` function from the `car` package.
+
+```{r}
+lm_hibbs <- lm(vote ~ growth, data = hibbs)
+Anova(lm_hibbs)
+```
+
+| Value   | Meaning         | More          |
+|---------|-----------------|---------------|
+| 273.63  | SSE(R) - SSE(F) | SSR also SSTO |
+| 198.27  | SSE(F)          | SSE           |
+| 1       | df(R) - df(F)   |               |
+| 14      | df(F)           |               |
+| 19.321  | F-Statics       |               |
+| 0.00061 | P-Value         |               |
+
+Var = SSE(F) / df(F)
+
+R has an `anova()` function, and we will use it, nut it is less useful in multiple linear regression.
+```{r}
+anova(lm_hibbs)
+```
+
+Use `glance()` to get R^2 in R
+```{r}
+glance(lm_hibbs)
+```
+57.98% of the variability in incumbent vote-share was explained by economic growth.
+
+To make a fits vers residuals plot, get the fitted values and the residuals with `augment()`. 
+Make a scatterplot of `.fitted` versus the `.resid` variables
+```{r}
+a_hibbs <- augment(lm_hibbs)
+ggplot(a_hibbs, aes(x = .fitted, y = .resid)) + 
+  geom_point() + 
+  geom_hline(yintercept = 0)
+```
+
+For sandwich estimate, use the `lmtest` and `sandwich` packages
+```{r}
+library(lmtest)
+library(sandwich)
+## vcon. tells the software how to estimate the standard errors
+## vconHC is a function to estimate sandwich standard errors (Heteroskedastic Consistent)
+cout <- coeftest(lm_hibbs, vcon. = vcovHC)
+tidy(cout)
+```
+```{r}
+tidy(lm_hibbs)
+```
+
+Only make qq-plots of residuals. To do so, use the `sample` aesthetic in `ggplot()`, and use `geom_qq()`.
+
+```{r}
+ggplot(a_hibbs, aes(sample = .resid)) +
+  geom_qq() + 
+  geom_qq_line()
+```
+
+Only check normality last, because other violations will result in non-normal looking QQ-plots.
+
+
