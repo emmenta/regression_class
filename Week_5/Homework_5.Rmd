@@ -2,7 +2,12 @@
 title: "Homework_5"
 author: "Emmenta Janneh"
 date: "2024-02-17"
-output: pdf_document
+output:
+  pdf_document: default
+  word_document: default
+editor_options:
+  markdown:
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -14,7 +19,7 @@ library(tidyverse)
 library(broom)
 library(car)
 library(lmtest)
-library(sandwich)
+library(latex2exp)
 sol <- tribble(~conc, ~time,
                0.07, 9,
                0.09, 9,
@@ -34,13 +39,22 @@ sol <- tribble(~conc, ~time,
 )
 ```
 
+## Solution Concentration
+
 ### 1
+
 ```{r}
 ggplot(sol, aes(x = time, y = conc)) +
   geom_point() +
-  geom_smooth(method = lm, se = FALSE)
+  geom_smooth(se = FALSE)
   
 ```
+
+The relationship between concentration and time is curved, and the
+association is negative. There are no outliers in the data points, but
+we have a violation of constant variance.
+
+Lets explore the residuals in a linear regression.
 
 ```{r}
 lm_sol <- lm(conc~time, data = sol)
@@ -50,10 +64,16 @@ ggplot(a_sol, aes(x = .fitted, y = .resid)) +
   geom_hline(yintercept = 0)
 ```
 
-From the graph above, we observe the following:
- - Curved relation between time and concentration
- - Monotone
- - Variance look like it increase as y increases
+From the graphs above, we observe the following:
+
+-   Curved relation between time and concentration
+-   Monotone
+-   Variance look like it increase as y increases
+
+### 2
+
+To resolve the violations in our analysis, lets transform the
+concentration to log.
 
 ```{r}
 sol <- mutate(sol, log_conc = log(conc))
@@ -61,6 +81,7 @@ ggplot(sol, aes(x = time, y = log_conc)) +
   geom_point() +
   geom_smooth(method = lm, se = FALSE)
 ```
+
 ```{r}
 new_lmsol <- lm(log_conc ~ time, sol)
 new_asol <- augment(new_lmsol)
@@ -68,38 +89,37 @@ ggplot(new_asol, aes(x = .fitted, y = .resid)) +
   geom_point() +
   geom_hline(yintercept = 0)
 ```
-Explaination here
 
+```{r}
+tidy(new_lmsol, conf.int = TRUE)
+```
 
+With the transformation, we came up with a model
+`log(y) = 1.51 - 0.45x + noise`. With this, we would conclude that we
+have a very strong evidence of a linear association between concentration and
+time (***p \< 0.001, n = 15***). Solutions with 1 more hour are
+estimated to have 36.2% worse concentrations, on average (with
+confidence interval of 34.8%  lower and 37.7% lower).
 
+## Real Estate Data
 
+We are using the estate data from
+`https://dcgerard.github.io/stat_415_615/data/estate.csv` for this
+analysis.
 
-We are using the estate data from `https://dcgerard.github.io/stat_415_615/data/estate.csv` for this analysis.
 ```{r}
 estate <- read_csv("https://dcgerard.github.io/stat_415_615/data/estate.csv")
 ```
-The two variables are
- - `price`: sales price for houses.
- - `area`: size of houses in square feet.
+
+### 1
+
+The two variables are 
+- `price`: sales price for houses in US Dollars. 
+- `area`: size of houses finished in square feet.
 
 ```{r}
 ggplot(estate, aes(x = area, y = price)) +
   geom_point()
-```
-
-```{r}
-glance(lm_estate)
-```
-
-```{r}
-lm_estate <- lm(price ~ area, estate)
-tidy(lm_estate, conf.int = TRUE)
-```
-
-```{r}
-newdf <- data.frame(area = c(576, 1020, 3067))
-predict(object = lm_estate, newdata = newdf, interval = "confidence") |>
-  cbind(newdf)
 ```
 
 ```{r}
@@ -109,8 +129,8 @@ ggplot(estate, aes(x = area, y = price)) +
   geom_smooth(se = FALSE, color = "red", linetype = 2)
 ```
 
-
 ```{r}
+lm_estate <- lm(price ~ area, estate)
 a_estate <- augment(lm_estate)
 ggplot(a_estate, aes(x = .fitted, y = .resid)) +
   geom_point() + 
@@ -118,7 +138,6 @@ ggplot(a_estate, aes(x = .fitted, y = .resid)) +
   geom_smooth(se = FALSE, color = "red", linetype = 2)
 
 ```
-
 
 ```{r}
 new_estate <- mutate(estate, log_price = log(price), log_area = log(area))
@@ -129,16 +148,90 @@ ggplot(new_estate, aes(x = log_area, y = log_price)) +
 
 ```{r}
 new_lmestate <- lm(log_price ~ log_area, new_estate)
+new_lmestate
 a_newestate <- augment(new_lmestate)
 ggplot(a_newestate, aes(x = .fitted, y = .resid)) +
   geom_point() +
   geom_hline(yintercept = 0, color = "blue", linewidth = 1)
 ```
 
-
 ```{r}
-cout <- coeftest(lm_estate, vcon. = vcovHC)
-tidy(cout)
+tidy(new_lmestate, conf.int = TRUE)
 ```
 
+```{r}
+newdf <- data.frame(log_area = c(576, 1020, 3067))
+newdf <- mutate(newdf, log_area = log(log_area))
+predict(object = new_lmestate, newdata = newdf, interval = "prediction") |>
+  cbind(newdf) -> newdf
+newdf <- mutate(newdf, fit = exp(fit), lwr = exp(lwr), upr = exp(upr), log_area = exp(log_area))
+newdf
+```
 
+\newpage
+
+## Report
+
+For the analysis, we are using the estat data from dcgerard.github.io
+(<https://dcgerard.github.io/stat_415_615/data/estate.csv>). The
+variables of concern are
+
+-   `price`: Sales price of houses in US Dollars
+
+-   `area`: Size of houses finished in square feet
+
+The first thing we did is to plot the data and we found some violations
+to the linear model. Characteristics of the data points constructed
+include:
+
+-   `Linearity`: There is definitely a positive association between
+    price and area, and the data points seems linear
+
+-   `Uncorrelated error`: We assume the data was randomly sampled
+
+-   `Nonequal variance`: We can clearly see that the standard errors of
+    the data points are off. The variance tends to be larger as we move
+    up to higher area sizes.
+
+To resolve this, we transform our x and/or y variables. We started off
+by transforming the y(price) to log(y). Than still did not resolve our
+variance, so we advanced into transforming x(area) as well, to log(x),
+and that seem to work better. We fit using the log transformation of x
+and y, and that seems to also work well.
+
+We did a **T**-test to see if the linear model is insufficient:
+
+-   `H0`:B1 = 0 - No linear association
+
+-   `HA`:B1 != 0 - Linear association
+
+This shows that we have a very strong evidence against the Null hypothesis (p \< 0.001). This is a very strong evidence against the NULL Hypothesis `(p-value = 1.196211e-148, n = 522)`. We estimate that
+houses to have on average **2.4** times higher price for area that are
+twice as large(**95%** confidence interval of **2.3** lower and **2.5**
+higher).
+
+Since our goal was to predict the prices of houses with areas of 576,
+1020, 3067 square feet, we transform the data back to its original
+scale.
+
+-   Houses with area of 576 are estimated to be at \$47,780.24 with
+    confidence range of \$30,385.70 to \$75,132.42
+
+-   Houses with area of 1020 are estimated to be at \$97,894.03 with
+    confidence range \$62,616.93 to \$153,045.54
+
+-   Houses with area of 3067 are estimated to be at \$389,829.98 with
+    confidence range \$249,894.86 to \$608,125.42
+
+This is represented in the graph below
+
+```{r}
+ggplot(data = newdf, aes(x = log_area, y = fit)) +
+  geom_point() +
+  geom_line(data = newdf, aes(x = log_area, y = fit)) + 
+  geom_ribbon(data = newdf, mapping = aes(x = log_area, ymin = lwr, ymax = upr), alpha = 0.2, fill = "red") + 
+  geom_text(aes(label = paste("(", log_area, ", $", round(fit, 2), ")")), nudge_x = 0.1, nudge_y = 0.1, vjust = 1, hjust = 0.05, angle = 90, color = "blue") +
+  ggtitle(TeX("Estimated Model: $log(y) = 2.796303 + 1.255181log(x) + noise$")) +
+  xlab("Area in square feet") + 
+  ylab("Estimated price with CI")
+```
