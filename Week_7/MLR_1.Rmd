@@ -1,0 +1,151 @@
+---
+title: "MLR 1"
+author: "Emmenta Janneh"
+date: "2024-03-19"
+output: pdf_document
+---
+
+```{r}
+library(tidyverse)
+library(broom)
+```
+
+```{r}
+portrait <- tribble(~young, ~disp, ~sales,
+                    68.5,   16.7,  174.4,
+                    45.2,   16.8,  164.4,
+                    91.3,   18.2,  244.2,
+                    47.8,   16.3,  154.6,
+                    46.9,   17.3,  181.6,
+                    66.1,   18.2,  207.5,
+                    49.5,   15.9,  152.8,
+                    52.0,   17.2,  163.2,
+                    48.9,   16.6,  145.4,
+                    38.4,   16.0,  137.2,
+                    87.9,   18.3,  241.9,
+                    72.8,   17.1,  191.1,
+                    88.4,   17.4,  232.0,
+                    42.9,   15.8,  145.3,
+                    52.5,   17.8,  161.1,
+                    85.7,   18.4,  209.7,
+                    41.3,   16.5,  146.4,
+                    51.7,   16.3,  144.0,
+                    89.6,   18.1,  232.6,
+                    82.7,   19.1,  224.1,
+                    52.3,   16.0,  166.5)
+```
+
+
+```{r}
+ggplot(portrait, aes(x = young, y = sales)) +
+  geom_point()
+
+ggplot(portrait, aes(x = disp, y = sales)) +
+  geom_point()
+
+ggplot(portrait, aes(x = disp, y = young)) +
+  geom_point()
+```
+
+
+You can vreate a "pairs plot" that makes all possible scatterplots
+```{r}
+library(GGally)
+ggpairs(portrait)
+```
+
+
+To fit a multiple linear regression model of sales on sales on young and disp, we use lm()
+```{r}
+lm_portrait <- lm(sales ~ young + disp, data = portrait)
+tidy(lm_portrait, conf.int = TRUE)
+```
+
+Let's interpret 1.455:
+
+$\frac{\hat{\beta}_1{2}}$
+
+Cities that hace 1000 more young people, but the same amount of per capita disposable income, have \$1455 more sales on average (95% CI of\$1009 to \$1899).
+AKA
+Cities that have 1000 more young people have \$1455 more sales on average (95% CI of \$1009 to \$1899), adjusting for disposable income.
+
+Interpret the 9.366
+
+Cities with \$1000 more in per capita disposable income, but the same number of young people, have \$9366 in more sales on average (95% CI of \$827 to \$17904).
+AKA
+Cities with \$1000 more in per capita disposable income have \$9366 in more sales on average (95% CI of \$827 to \$17904), adjusting for the number of young people.
+
+Let's compare the MLR coefficient estimates to the SLR coefficient estimates.
+```{r}
+lm_disp <- lm(sales ~ disp, data = portrait)
+tidy(lm_disp)
+```
+
+```{r}
+tidy(lm_portrait)
+```
+
+Cities that have \$1000 more per capita disposable income have \$31,170 more sales on average.
+
+Cities that have \$1000 more per capita disposable income, but the same number of young people, have \$9366 more sales on average.
+
+You obtain fitted values by `augment()`
+```{r}
+aout <- augment(lm_portrait)
+aout
+```
+
+If you want estimates and predictions at x values not in the data, you create a data frame with those x values, and then use `predict()`.
+```{r}
+range(portrait$young)
+range(portrait$disp)
+
+# Let's create a prediction at young = 49, 52 and disp = 16, 17
+newdf <- data.frame(young = c(49, 52), disp = c(16, 17))
+predict(lm_portrait, newdf, interval = "confidence") 
+predict(lm_portrait, newdf, interval = "prediction")
+```
+
+We predict that a city with 49000 young peole and \$16000 in per capita disposable income will have \$152300 in sales (95% prediction interval of \$127,800 to \$176,800).
+
+
+Let's create some residual plots to evaluate our assumptions
+```{r}
+ggplot(aout, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+
+ggplot(aout, aes(x = young, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+
+ggplot(aout, aes(x = disp, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+
+ggplot(aout, aes(sample = .resid)) +
+  geom_qq() +
+  geom_qq_line()
+```
+
+
+## Estate
+
+```{r}
+estate <- read_csv("https://dcgerard.github.io/stat_415_615/data/estate.csv")
+estate_sub <- select(estate, area, lot, price)
+estate_sub <- mutate(estate_sub, 
+                     log_area = log(area),
+                     log_lot = log(lot), 
+                     log_price = log(price))
+lm_estate <- lm(log_price ~ log_area + log_lot, data = estate_sub)
+tidy(lm_estate)
+```
+Houses with twice the area but the same lot size cost 2.3 (2^1.21) times as much, on average.
+Houses with twice the lot size but the same area cost 8% (2^0.1103 - 1) more, on average.
+
+```{r}
+newdf <- data.frame(log_area = log(1000), log_lot = log(10000))
+exp(predict(lm_estate, newdata = newdf, interval = "prediction"))
+```
+
